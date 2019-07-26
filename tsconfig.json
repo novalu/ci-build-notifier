@@ -9,7 +9,8 @@
     "emitDecoratorMetadata": true,
     "noImplicitAny": false,
     "sourceMap": true,
-    "rootDir": "",
+    "rootDir": "src",
+    "outDir": "bin",
     "esModuleInterop": true
   },
   "include": [
