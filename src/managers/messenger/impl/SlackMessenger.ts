@@ -57,7 +57,7 @@ class SlackMessenger implements Messenger {
         const webhook = new IncomingWebhook(webhookUrl);
         await webhook.send({
             username: "Jenkins [bot]",
-            icon_url: "",
+            icon_url: "https://raw.githubusercontent.com/novalu/ci-build-notifier/master/assets/jenkins-logo.png",
             text: `${text} build ${buildInfo.build}`,
             attachments: [
                 {
