@@ -37,17 +37,17 @@ let SlackMessenger = class SlackMessenger {
             short: true
         };
     }
+    createBuildField(buildInfo) {
+        return {
+            title: "Build",
+            value: buildInfo.build,
+            short: true
+        };
+    }
     createAuthorField(buildInfo) {
         return {
             title: "Author",
             value: buildInfo.authorName,
-            short: true
-        };
-    }
-    createCommitField(buildInfo) {
-        return {
-            title: "Commit",
-            value: buildInfo.commitShortHash,
             short: true
         };
     }
@@ -58,10 +58,10 @@ let SlackMessenger = class SlackMessenger {
             short: true
         };
     }
-    createMessageField(buildInfo) {
+    createCommitField(buildInfo) {
         return {
             title: "Commit message",
-            value: buildInfo.commitMessage,
+            value: `${buildInfo.commitShortHash}: ${buildInfo.commitMessage}`,
             short: false
         };
     }
@@ -71,16 +71,16 @@ let SlackMessenger = class SlackMessenger {
             yield webhook.send({
                 username: "Jenkins [bot]",
                 icon_url: "https://raw.githubusercontent.com/novalu/ci-build-notifier/master/assets/jenkins-logo.png",
-                text: `${text} build ${buildInfo.build}`,
+                text,
                 attachments: [
                     {
                         color,
                         fields: [
                             this.createVersionField(buildInfo),
+                            this.createBuildField(buildInfo),
                             this.createAuthorField(buildInfo),
-                            this.createCommitField(buildInfo),
                             this.createBranchField(buildInfo),
-                            this.createMessageField(buildInfo)
+                            this.createCommitField(buildInfo)
                         ]
                     }
                 ]

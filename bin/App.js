@@ -86,7 +86,7 @@ let App = class App {
             const packageJsonContent = yield fs_extra_1.default.readJson(path_1.default.join(__dirname, '..', 'package.json'));
             commander_1.default
                 .version(packageJsonContent.version)
-                .option("-p, --app-path <var>", "Application path")
+                .option("-p, --app-path <var>", "Application path where package.json is")
                 .option("-g, --git-path <var>", "GIT path")
                 .option("-w, --webhook <var>", "Slack webhook URL")
                 .option("-c, --color <var>", "Slack message color")
