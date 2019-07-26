@@ -1,0 +1,13 @@
+############### APP ##################
+
+node_modules
+
+**/*.js
+**/*.js.map
+
+############## .IDEA #################
+
+**/.idea/workspace.xml
+**/.idea/markdown-exported-files.xml
+**/.idea/markdown-navigator.xml
+**/.idea/tasks.xml
