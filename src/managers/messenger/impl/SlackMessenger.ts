@@ -21,18 +21,18 @@ class SlackMessenger implements Messenger {
         }
     }
 
+    private createBuildField(buildInfo: BuildInfo): any {
+        return {
+            title: "Build",
+            value: buildInfo.build,
+            short: true
+        }
+    }
+
     private createAuthorField(buildInfo: BuildInfo): any {
         return {
             title: "Author",
             value: buildInfo.authorName,
-            short: true
-        }
-    }
-
-    private createCommitField(buildInfo: BuildInfo): any {
-        return {
-            title: "Commit",
-            value: buildInfo.commitShortHash,
             short: true
         }
     }
@@ -45,10 +45,10 @@ class SlackMessenger implements Messenger {
         }
     }
 
-    private createMessageField(buildInfo: BuildInfo): any {
+    private createCommitField(buildInfo: BuildInfo): any {
         return {
             title: "Commit message",
-            value: buildInfo.commitMessage,
+            value: `${buildInfo.commitShortHash}: ${buildInfo.commitMessage}`,
             short: false
         }
     }
@@ -58,16 +58,16 @@ class SlackMessenger implements Messenger {
         await webhook.send({
             username: "Jenkins [bot]",
             icon_url: "https://raw.githubusercontent.com/novalu/ci-build-notifier/master/assets/jenkins-logo.png",
-            text: `${text} build ${buildInfo.build}`,
+            text,
             attachments: [
                 {
                     color,
                     fields: [
                         this.createVersionField(buildInfo),
+                        this.createBuildField(buildInfo),
                         this.createAuthorField(buildInfo),
-                        this.createCommitField(buildInfo),
                         this.createBranchField(buildInfo),
-                        this.createMessageField(buildInfo)
+                        this.createCommitField(buildInfo)
                     ]
                 }
             ]
