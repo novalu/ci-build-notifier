@@ -1,4 +1,4 @@
-# CI Build Notifier
+# CI Build Slack Notifier
 
 Script is meant to be used with Continuous Integration server like Jenkins to notify about build state by sending messages to Slack. It is written as a simple alternative to offical [Slack plugin for Jenkins](https://github.com/jenkinsci/slack-plugin). However, because this project is a simple Node script, it can be used with different server than Jenkins or whatever service you're using.
 
@@ -43,7 +43,7 @@ Webhook URL is Slack Incoming Webhook, you can read more here: [https://api.sla
 ### Standalone
 
 ```shell script
-node bin/main.js -p "./app" -g "./" -w "https://hooks.slack.com/services/XXXXXXXXX/YYYYYYYYY/ZZZZZZZZZZZZZZZZZZZZZZZZ" -c "#AAAAAA" -t "Started"
+node bin/main.js -p "./app" -g "./" -w "https://hooks.slack.com/services/XXXXXXXXX/YYYYYYYYY/ZZZZZZZZZZZZZZZZZZZZZZZZ" -c "#AAAAAA" -t "Build started"
 ```
 
 ### In Jenkins pipeline
@@ -54,7 +54,7 @@ pipeline {
   stages {
     stage('Send start notification to Slack') {
       steps {
-        sh 'node bin/main.js -p "$WORKSPACE/app" -g "$WORKSPACE" -w "https://hooks.slack.com/services/XXXXXXXXX/YYYYYYYYY/ZZZZZZZZZZZZZZZZZZZZZZZZ" -c "#AAAAAA" -t "Started"'
+        sh 'node bin/main.js -p "$WORKSPACE/app" -g "$WORKSPACE" -w "https://hooks.slack.com/services/XXXXXXXXX/YYYYYYYYY/ZZZZZZZZZZZZZZZZZZZZZZZZ" -c "#AAAAAA" -t "Build started"'
       }
     }
   }
