@@ -1,11 +1,11 @@
 {
   "name": "ci-build-notifier",
-  "version": "1.0.0-beta.2",
+  "version": "1.0.0-beta.3",
   "description": "",
   "main": "index.js",
   "scripts": {
     "build": "tsc",
-    "start": "node src/main.js"
+    "start": "node bin/main.js"
   },
   "author": "",
   "license": "ISC",

@@ -70,7 +70,7 @@ class App {
 
         commander
             .version(packageJsonContent.version)
-            .option("-p, --app-path <var>", "Application path")
+            .option("-p, --app-path <var>", "Application path where package.json is")
             .option("-g, --git-path <var>", "GIT path")
             .option("-w, --webhook <var>", "Slack webhook URL")
             .option("-c, --color <var>", "Slack message color")
