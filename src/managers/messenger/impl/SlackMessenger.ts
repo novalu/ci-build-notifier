@@ -47,7 +47,7 @@ class SlackMessenger implements Messenger {
 
     private createCommitField(buildInfo: BuildInfo): any {
         return {
-            title: "Commit message",
+            title: "Commit",
             value: `${buildInfo.commitShortHash}: ${buildInfo.commitMessage}`,
             short: false
         }
