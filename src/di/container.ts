@@ -7,6 +7,7 @@ import { CommitProvider } from "../providers/commit_provider/CommitProvider";
 import { AppLastCommitCommitProvider } from "../providers/commit_provider/impl/AppLastCommitCommitProvider";
 import {Messenger} from "../managers/messenger/Messenger";
 import {SlackMessenger} from "../managers/messenger/impl/SlackMessenger";
+import {ConsoleMessenger} from "../managers/messenger/impl/ConsoleMessenger";
 
 const container = new Container();
 

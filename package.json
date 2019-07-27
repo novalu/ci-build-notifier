@@ -1,17 +1,19 @@
 {
   "name": "ci-build-notifier",
   "version": "1.0.0",
-  "description": "",
+  "description": "Script for sending messages to Slack with build info from Continuous Integration server like Jenkins",
   "main": "index.js",
+  "repository": "github:novalu/ci-build-notifier",
   "scripts": {
     "build": "tsc",
     "start": "node bin/main.js"
   },
-  "author": "",
+  "author": "novalu",
   "license": "ISC",
   "dependencies": {
     "@slack/client": "5.0.1",
     "@types/highland": "2.12.3",
+    "chalk": "^2.4.2",
     "commander": "2.20.0",
     "env-ci": "4.1.1",
     "fs-extra": "8.1.0",
