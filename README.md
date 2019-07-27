@@ -10,7 +10,7 @@ Notifier get build info and current commit from environment variables or last co
 
 If you don't want to use Slack, you can show combined info in console, see options below.
 
-# Supported CIs
+## Supported CIs
 
 See package [env-ci on npm](https://www.npmjs.com/package/env-ci).
 
