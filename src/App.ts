@@ -57,7 +57,7 @@ class App {
         const buildDetails = new BuildInfo();
         const commit: any = await this.getCommit(gitPath);
         buildDetails.commitShortHash = commit.shortHash;
-        buildDetails.authorName = commit.authorName;
+        buildDetails.author = commit.authorName;
         buildDetails.commitMessage = commit.subject;
         buildDetails.version = await this.getVersion(appPath);
         buildDetails.build = envCi().build;
