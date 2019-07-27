@@ -32,7 +32,7 @@ class SlackMessenger implements Messenger {
     private createAuthorField(buildInfo: BuildInfo): any {
         return {
             title: "Author",
-            value: buildInfo.authorName,
+            value: buildInfo.author,
             short: true
         }
     }
@@ -46,11 +46,31 @@ class SlackMessenger implements Messenger {
     }
 
     private createCommitField(buildInfo: BuildInfo): any {
+        let textArr = [];
+        if (buildInfo.commitShortHash) textArr.push(`#${buildInfo.commitShortHash}`);
+        if (buildInfo.commitMessage) textArr.push(buildInfo.commitMessage);
         return {
             title: "Commit",
-            value: `${buildInfo.commitShortHash}: ${buildInfo.commitMessage}`,
+            value: textArr.join(" "),
             short: false
         }
+    }
+
+    private createFields(buildInfo: BuildInfo): any[] {
+        const fields = [];
+        if (buildInfo.version) fields.push(this.createVersionField(buildInfo));
+        if (buildInfo.build) fields.push(this.createBuildField(buildInfo));
+        if (buildInfo.author) fields.push(this.createAuthorField(buildInfo));
+        if (buildInfo.branch) fields.push(this.createBranchField(buildInfo));
+        if (buildInfo.commitShortHash || buildInfo.commitMessage) fields.push(this.createCommitField(buildInfo));
+        return fields;
+    }
+
+    private createAttachment(buildInfo: BuildInfo, color: string): object {
+        const attachment: any = {};
+        attachment.fields = this.createFields(buildInfo);
+        if (color) attachment.color = color;
+        return attachment;
     }
 
     public async sendMessage(buildInfo: BuildInfo, webhookUrl: string, color: string, text: string) {
@@ -59,18 +79,7 @@ class SlackMessenger implements Messenger {
             username: "Jenkins [bot]",
             icon_url: "https://raw.githubusercontent.com/novalu/ci-build-notifier/master/assets/jenkins-logo.png",
             text,
-            attachments: [
-                {
-                    color,
-                    fields: [
-                        this.createVersionField(buildInfo),
-                        this.createBuildField(buildInfo),
-                        this.createAuthorField(buildInfo),
-                        this.createBranchField(buildInfo),
-                        this.createCommitField(buildInfo)
-                    ]
-                }
-            ]
+            attachments: [ this.createAttachment(buildInfo, color) ]
         });
         this.logger.info("Message sent");
     }

@@ -7,7 +7,4 @@ src/**/*.js.map
 
 ############## .IDEA #################
 
-**/.idea/workspace.xml
-**/.idea/markdown-exported-files.xml
-**/.idea/markdown-navigator.xml
-**/.idea/tasks.xml
+.idea
