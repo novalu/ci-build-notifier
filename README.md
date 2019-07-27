@@ -87,8 +87,8 @@ Authors of used libraries especially author of env-ci.
 
 # Author
 
-![Author](http://www.novaklukas.cz/images/profile.png)
+## Lukas Novak
 
-Lukas Novak
+[![Author](http://www.novaklukas.cz/images/profile.png)](http://www.novaklukas.cz)
 
 Freelance full-stack software developer based in Olomouc, Czech Republic. I focus on mobile apps with Kotlin, servers in Node.js. As a hobby, I build my smart home. See my [personal web page](http://www.novaklukas.cz) (in Czech) or blog on [Medium](https://medium.com/@novalu)

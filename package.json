@@ -4,7 +4,6 @@
   "description": "Script for sending messages to Slack with build info from Continuous Integration server like Jenkins",
   "main": "index.js",
   "repository": "github:novalu/ci-build-notifier",
-  "homepage": "http://www.github.com/novalu/ci-build-notifier",
   "bin": "./bin/cli.js",
   "scripts": {
     "build": "tsc",
