@@ -30,13 +30,16 @@ const fs_extra_1 = __importDefault(require("fs-extra"));
 const path_1 = __importDefault(require("path"));
 const commander_1 = __importDefault(require("commander"));
 const validator_1 = __importDefault(require("validator"));
+const container_1 = __importDefault(require("./di/container"));
 const BuildInfo_1 = require("./model/BuildInfo");
 const inversify_1 = require("inversify");
 const types_1 = __importDefault(require("./di/types"));
+const ConsoleMessenger_1 = require("./managers/messenger/impl/ConsoleMessenger");
+const SlackMessenger_1 = require("./managers/messenger/impl/SlackMessenger");
+const AppLastCommitCommitProvider_1 = require("./providers/commit_provider/impl/AppLastCommitCommitProvider");
+const CiCommitProvider_1 = require("./providers/commit_provider/impl/CiCommitProvider");
 let App = class App {
-    constructor(messenger, commitProvider, logger) {
-        this.messenger = messenger;
-        this.commitProvider = commitProvider;
+    constructor(logger) {
         this.logger = logger;
     }
     getCommitHistory(appPath) {
@@ -54,28 +57,34 @@ let App = class App {
     getCommit(gitPath) {
         return __awaiter(this, void 0, void 0, function* () {
             const commitHistory = this.getCommitHistory(gitPath);
-            const commitHash = yield this.commitProvider.getCommitHash(gitPath);
+            const commitProvider = container_1.default.get(types_1.default.CommitProvider);
+            const commitHash = yield commitProvider.getCommitHash(gitPath);
             const commit = yield this.findCommit(commitHistory, commitHash);
             if (!commit)
                 throw new Error(`Commit ${commitHash} not found`);
             return commit;
         });
     }
-    getVersion(appPath) {
+    getVersionFromApp(appPath) {
         return __awaiter(this, void 0, void 0, function* () {
             const packageJsonPath = path_1.default.join(appPath, 'package.json');
             const packageJsonContent = yield fs_extra_1.default.readJson(packageJsonPath);
             return packageJsonContent.version;
         });
     }
-    makeBuildInfo(appPath, gitPath) {
+    makeBuildInfo(appPath, gitPath, version) {
         return __awaiter(this, void 0, void 0, function* () {
             const buildDetails = new BuildInfo_1.BuildInfo();
             const commit = yield this.getCommit(gitPath);
             buildDetails.commitShortHash = commit.shortHash;
-            buildDetails.authorName = commit.authorName;
             buildDetails.commitMessage = commit.subject;
-            buildDetails.version = yield this.getVersion(appPath);
+            buildDetails.author = commit.authorName;
+            if (appPath) {
+                buildDetails.version = yield this.getVersionFromApp(appPath);
+            }
+            else if (version) {
+                buildDetails.version = version;
+            }
             buildDetails.build = env_ci_1.default().build;
             buildDetails.branch = env_ci_1.default().branch;
             return buildDetails;
@@ -86,48 +95,48 @@ let App = class App {
             const packageJsonContent = yield fs_extra_1.default.readJson(path_1.default.join(__dirname, '..', 'package.json'));
             commander_1.default
                 .version(packageJsonContent.version)
-                .option("-p, --app-path <var>", "Application path where package.json is")
-                .option("-g, --git-path <var>", "GIT path")
-                .option("-w, --webhook <var>", "Slack webhook URL")
-                .option("-c, --color <var>", "Slack message color")
-                .option("-t, --text <var>", "Slack message text")
+                .option("-g, --git-path <var>", "GIT root path")
+                .option("-t, --text <var>", "Message text")
+                .option("-a, --node-app-path <var>", "Node.js application path as a source for version (optional)")
+                .option("-v, --app-version <var>", "Set version manually (optional)")
+                .option("--last-commit", "Use last commit from GIT history instead of current commit from CI")
+                .option("-c, --color <var>", "Message hex color (optional)")
+                .option("--use-console", "Use console output instead of Slack")
+                .option("-s, --slack-webhook <var>", "Slack webhook URL (used only if --use-console is not set)")
                 .parse(process.argv);
-            if (!commander_1.default.appPath || commander_1.default.appPath.length === 0) {
-                this.logger.error("Application path is not defined");
+            if (commander_1.default.nodeAppPath && !(yield fs_extra_1.default.pathExists(commander_1.default.nodeAppPath))) {
+                this.logger.error("Application path is defined but does not exist");
                 return false;
             }
-            if (!commander_1.default.gitPath || commander_1.default.gitPath.length === 0) {
-                this.logger.error("GIT path is not defined");
+            if (!commander_1.default.gitPath || !(yield fs_extra_1.default.pathExists(commander_1.default.gitPath))) {
+                this.logger.error("GIT path is not defined or does not exist");
                 return false;
             }
-            if (!commander_1.default.webhook || commander_1.default.webhook.length === 0) {
+            if (!commander_1.default.useConsole && (!commander_1.default.slackWebhook || commander_1.default.slackWebhook.length === 0)) {
                 this.logger.error("Slack webhook is not defined");
                 return false;
             }
-            if (!commander_1.default.color || commander_1.default.color.length === 0) {
-                this.logger.error("Color is not defined");
-                return false;
-            }
-            if (!validator_1.default.isHexColor(commander_1.default.color)) {
-                this.logger.error("Color is not valid");
+            if (commander_1.default.color && !validator_1.default.isHexColor(commander_1.default.color)) {
+                this.logger.error("Color is defined but it is not valid");
                 return false;
             }
             if (!commander_1.default.text || commander_1.default.text.length === 0) {
                 this.logger.error("Text is not defined");
                 return false;
             }
-            const buildInfo = yield this.makeBuildInfo(commander_1.default.appPath, commander_1.default.gitPath);
-            yield this.messenger.sendMessage(buildInfo, commander_1.default.webhook, commander_1.default.color, commander_1.default.text);
+            container_1.default.bind(types_1.default.CommitProvider).to(commander_1.default.lastCommit ? AppLastCommitCommitProvider_1.AppLastCommitCommitProvider : CiCommitProvider_1.CiCommitProvider);
+            container_1.default.bind(types_1.default.Messenger).to(commander_1.default.useConsole ? ConsoleMessenger_1.ConsoleMessenger : SlackMessenger_1.SlackMessenger);
+            const messenger = container_1.default.get(types_1.default.Messenger);
+            const buildInfo = yield this.makeBuildInfo(commander_1.default.nodeAppPath, commander_1.default.gitPath, commander_1.default.appVersion);
+            yield messenger.sendMessage(buildInfo, commander_1.default.slackWebhook, commander_1.default.color, commander_1.default.text);
             return true;
         });
     }
 };
 App = __decorate([
     inversify_1.injectable(),
-    __param(0, inversify_1.inject(types_1.default.Messenger)),
-    __param(1, inversify_1.inject(types_1.default.CommitProvider)),
-    __param(2, inversify_1.inject(types_1.default.Logger)),
-    __metadata("design:paramtypes", [Object, Object, Object])
+    __param(0, inversify_1.inject(types_1.default.Logger)),
+    __metadata("design:paramtypes", [Object])
 ], App);
 exports.App = App;
 //# sourceMappingURL=App.js.map

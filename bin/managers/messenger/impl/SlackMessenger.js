@@ -47,7 +47,7 @@ let SlackMessenger = class SlackMessenger {
     createAuthorField(buildInfo) {
         return {
             title: "Author",
-            value: buildInfo.authorName,
+            value: buildInfo.author,
             short: true
         };
     }
@@ -59,11 +59,37 @@ let SlackMessenger = class SlackMessenger {
         };
     }
     createCommitField(buildInfo) {
+        let textArr = [];
+        if (buildInfo.commitShortHash)
+            textArr.push(`#${buildInfo.commitShortHash}`);
+        if (buildInfo.commitMessage)
+            textArr.push(buildInfo.commitMessage);
         return {
-            title: "Commit message",
-            value: `${buildInfo.commitShortHash}: ${buildInfo.commitMessage}`,
+            title: "Commit",
+            value: textArr.join(" "),
             short: false
         };
+    }
+    createFields(buildInfo) {
+        const fields = [];
+        if (buildInfo.version)
+            fields.push(this.createVersionField(buildInfo));
+        if (buildInfo.build)
+            fields.push(this.createBuildField(buildInfo));
+        if (buildInfo.author)
+            fields.push(this.createAuthorField(buildInfo));
+        if (buildInfo.branch)
+            fields.push(this.createBranchField(buildInfo));
+        if (buildInfo.commitShortHash || buildInfo.commitMessage)
+            fields.push(this.createCommitField(buildInfo));
+        return fields;
+    }
+    createAttachment(buildInfo, color) {
+        const attachment = {};
+        attachment.fields = this.createFields(buildInfo);
+        if (color)
+            attachment.color = color;
+        return attachment;
     }
     sendMessage(buildInfo, webhookUrl, color, text) {
         return __awaiter(this, void 0, void 0, function* () {
@@ -72,18 +98,7 @@ let SlackMessenger = class SlackMessenger {
                 username: "Jenkins [bot]",
                 icon_url: "https://raw.githubusercontent.com/novalu/ci-build-notifier/master/assets/jenkins-logo.png",
                 text,
-                attachments: [
-                    {
-                        color,
-                        fields: [
-                            this.createVersionField(buildInfo),
-                            this.createBuildField(buildInfo),
-                            this.createAuthorField(buildInfo),
-                            this.createBranchField(buildInfo),
-                            this.createCommitField(buildInfo)
-                        ]
-                    }
-                ]
+                attachments: [this.createAttachment(buildInfo, color)]
             });
             this.logger.info("Message sent");
         });
