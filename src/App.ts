@@ -73,8 +73,8 @@ class App {
             .option("-p, --app-path <var>", "Application path where package.json is")
             .option("-g, --git-path <var>", "GIT path")
             .option("-w, --webhook <var>", "Slack webhook URL")
-            .option("-c, --color <var>", "Slack message color")
-            .option("-t, --text <var>", "Slack message text")
+            .option("-c, --color [var]", "Message color")
+            .option("-t, --text <var>", "Message text")
           .parse(process.argv);
 
         if (!commander.appPath || commander.appPath.length === 0) {
@@ -92,12 +92,7 @@ class App {
             return false;
         }
 
-        if (!commander.color || commander.color.length === 0) {
-            this.logger.error("Color is not defined");
-            return false;
-        }
-
-        if (!validator.isHexColor(commander.color)) {
+        if (commander.color && !validator.isHexColor(commander.color)) {
             this.logger.error("Color is not valid");
             return false;
         }
