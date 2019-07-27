@@ -6,6 +6,10 @@ Notifier get build and commit info from environment variables or custom GIT fold
 
 ![Slack screenshot](https://raw.githubusercontent.com/novalu/ci-build-notifier/master/assets/slack-screenshot.png)
 
+# Supported CIs
+
+See package [env-ci on npm](https://www.npmjs.com/package/env-ci).
+
 ## Install
 
 ### Install Node.js environment
@@ -77,3 +81,4 @@ Pull requests are welcome!
 
 * Set GIT path as optional in case of using GIT info from env-ci
 * Support declaring version directly from command line instead from parsing package.json (to support apps not written in Node)
+* Make package on npm
