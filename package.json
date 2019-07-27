@@ -6,7 +6,7 @@
   "repository": "github:novalu/ci-build-notifier",
   "scripts": {
     "build": "tsc",
-    "start": "node bin/main.js"
+    "start": "node bin/cli.js"
   },
   "author": "novalu",
   "license": "ISC",

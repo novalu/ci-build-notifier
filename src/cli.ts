@@ -1,3 +1,5 @@
+#!/usr/bin/env node
+
 import "reflect-metadata";
 import container from "./di/container";
 import TYPES from "./di/types";
