@@ -1,6 +1,6 @@
 {
   "name": "ci-build-notifier",
-  "version": "1.1.1",
+  "version": "1.1.2",
   "description": "Script for sending messages to Slack with build info from Continuous Integration server like Jenkins",
   "main": "index.js",
   "repository": "github:novalu/ci-build-notifier",
@@ -40,7 +40,9 @@
     "pretty-error": "2.1.1",
     "reflect-metadata": "0.1.13",
     "signale": "1.4.0",
-    "typescript": "^3.5.3",
     "validator": "^11.1.0"
+  },
+  "devDependencies": {
+    "typescript": "^3.5.3"
   }
 }

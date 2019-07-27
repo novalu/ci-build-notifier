@@ -1,3 +1,5 @@
+[![NPM](https://nodei.co/npm/ci-build-notifier.png)](https://nodei.co/npm/ci-build-notifier/)
+
 # CI Build Slack Notifier
 
 Script is meant to be used with Continuous Integration server like Jenkins to notify about build state by sending messages to Slack. It is written as a simple alternative to offical [Slack plugin for Jenkins](https://github.com/jenkinsci/slack-plugin). However, because this project is a simple Node script, it can be used with different server than Jenkins or whatever service you're using. Moreover, it can be used without the CI server getting info only from GIT.
