@@ -5,6 +5,7 @@ import fs from "fs-extra";
 import path from "path";
 import commander from "commander";
 import validator from "validator";
+import container from "./di/container";
 
 import { BuildInfo } from "./model/BuildInfo";
 import { inject, injectable } from "inversify";
@@ -12,13 +13,15 @@ import TYPES from "./di/types";
 import { Logger } from "./utils/log/Logger";
 import { CommitProvider } from "./providers/commit_provider/CommitProvider";
 import {Messenger} from "./managers/messenger/Messenger";
+import {ConsoleMessenger} from "./managers/messenger/impl/ConsoleMessenger";
+import {SlackMessenger} from "./managers/messenger/impl/SlackMessenger";
+import {AppLastCommitCommitProvider} from "./providers/commit_provider/impl/AppLastCommitCommitProvider";
+import {CiCommitProvider} from "./providers/commit_provider/impl/CiCommitProvider";
 
 @injectable()
 class App {
 
     constructor(
-        @inject(TYPES.Messenger) private messenger: Messenger,
-        @inject(TYPES.CommitProvider) private commitProvider: CommitProvider,
         @inject(TYPES.Logger) private logger: Logger
     ) {}
 
@@ -39,7 +42,8 @@ class App {
 
     private async getCommit(gitPath: string): Promise<object> {
         const commitHistory = this.getCommitHistory(gitPath);
-        const commitHash = await this.commitProvider.getCommitHash(gitPath);
+        const commitProvider = container.get<CommitProvider>(TYPES.CommitProvider);
+        const commitHash = await commitProvider.getCommitHash(gitPath);
         const commit = await this.findCommit(commitHistory, commitHash);
 
         if (!commit) throw new Error(`Commit ${commitHash} not found`);
@@ -47,19 +51,23 @@ class App {
         return commit;
     }
 
-    private async getVersion(appPath: string) {
+    private async getVersionFromApp(appPath: string) {
         const packageJsonPath = path.join(appPath, 'package.json');
         const packageJsonContent = await fs.readJson(packageJsonPath);
         return packageJsonContent.version;
     }
 
-    private async makeBuildInfo(appPath: string, gitPath: string): Promise<BuildInfo> {
+    private async makeBuildInfo(appPath: string, gitPath: string, version: string): Promise<BuildInfo> {
         const buildDetails = new BuildInfo();
         const commit: any = await this.getCommit(gitPath);
         buildDetails.commitShortHash = commit.shortHash;
-        buildDetails.author = commit.authorName;
         buildDetails.commitMessage = commit.subject;
-        buildDetails.version = await this.getVersion(appPath);
+        buildDetails.author = commit.authorName;
+        if (appPath) {
+            buildDetails.version = await this.getVersionFromApp(appPath);
+        } else if (version) {
+            buildDetails.version = version;
+        }
         buildDetails.build = envCi().build;
         buildDetails.branch = envCi().branch;
         return buildDetails;
@@ -70,30 +78,33 @@ class App {
 
         commander
             .version(packageJsonContent.version)
-            .option("-p, --app-path <var>", "Application path where package.json is")
-            .option("-g, --git-path <var>", "GIT path")
-            .option("-w, --webhook <var>", "Slack webhook URL")
-            .option("-c, --color [var]", "Message color")
+            .option("-g, --git-path <var>", "GIT root path")
             .option("-t, --text <var>", "Message text")
+            .option("-a, --node-app-path <var>", "Node.js application path as a source for version (optional)")
+            .option("-v, --app-version <var>", "Set version manually (optional)")
+            .option("--last-commit", "Use last commit from GIT history instead of current commit from CI")
+            .option("-c, --color <var>", "Message hex color (optional)")
+            .option("--use-console", "Use console output instead of Slack")
+            .option("-s, --slack-webhook <var>", "Slack webhook URL (used only if --use-console is not set)")
           .parse(process.argv);
 
-        if (!commander.appPath || commander.appPath.length === 0) {
-            this.logger.error("Application path is not defined");
+        if (commander.nodeAppPath && !(await fs.pathExists(commander.nodeAppPath))) {
+            this.logger.error("Application path is defined but does not exist");
             return false;
         }
 
-        if (!commander.gitPath || commander.gitPath.length === 0) {
-            this.logger.error("GIT path is not defined");
+        if (!commander.gitPath || !(await fs.pathExists(commander.gitPath))) {
+            this.logger.error("GIT path is not defined or does not exist");
             return false;
         }
 
-        if (!commander.webhook || commander.webhook.length === 0) {
+        if (!commander.useConsole && (!commander.slackWebhook || commander.slackWebhook.length === 0)) {
             this.logger.error("Slack webhook is not defined");
             return false;
         }
 
         if (commander.color && !validator.isHexColor(commander.color)) {
-            this.logger.error("Color is not valid");
+            this.logger.error("Color is defined but it is not valid");
             return false;
         }
 
@@ -102,8 +113,15 @@ class App {
             return false;
         }
 
-        const buildInfo = await this.makeBuildInfo(commander.appPath, commander.gitPath);
-        await this.messenger.sendMessage(buildInfo, commander.webhook, commander.color, commander.text);
+        container.bind<CommitProvider>(TYPES.CommitProvider).to(
+            commander.lastCommit ? AppLastCommitCommitProvider : CiCommitProvider);
+
+        container.bind<Messenger>(TYPES.Messenger).to(
+            commander.useConsole ? ConsoleMessenger : SlackMessenger);
+        const messenger = container.get<Messenger>(TYPES.Messenger);
+
+        const buildInfo = await this.makeBuildInfo(commander.nodeAppPath, commander.gitPath, commander.appVersion);
+        await messenger.sendMessage(buildInfo, commander.slackWebhook, commander.color, commander.text);
 
         return true;
     }

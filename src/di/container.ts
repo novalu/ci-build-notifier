@@ -17,16 +17,6 @@ container
     .inSingletonScope();
 
 container
-    .bind<Messenger>(TYPES.Messenger)
-    .to(SlackMessenger)
-    .inSingletonScope();
-
-container
-    .bind<CommitProvider>(TYPES.CommitProvider)
-    .to(AppLastCommitCommitProvider)
-    .inSingletonScope();
-
-container
     .bind<Logger>(TYPES.Logger)
     .to(SignaleLogger)
     .inSingletonScope();
