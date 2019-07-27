@@ -33,6 +33,12 @@ $ npm install ci-build-notifier
 
 ## Usage
 
+### Standalone
+
+```shell script
+ci-build-notifier -a "./app" -g "./" -s "https://hooks.slack.com/services/XXXXXXXXX/YYYYYYYYY/ZZZZZZZZZZZZZZZZZZZZZZZZ" -c "#AAAAAA" -t "Build started"
+```
+
 ### Options
 
 | Shorthand | Option | Description  |
@@ -46,13 +52,7 @@ $ npm install ci-build-notifier
 | | --use-console | Use console output instead of Slack |
 | -s | --slack-webhook | Slack webhook URL (used only if --use-console is not set) |
 
-Webhook URL is Slack Incoming Webhook, you can read more here: [https://api.slack.com/incoming-webhooks]
-
-### Standalone
-
-```shell script
-node bin/main.js -a "./app" -g "./" -s "https://hooks.slack.com/services/XXXXXXXXX/YYYYYYYYY/ZZZZZZZZZZZZZZZZZZZZZZZZ" -c "#AAAAAA" -t "Build started"
-```
+Webhook URL is Slack Incoming Webhook, you can read more and create one here: [https://api.slack.com/incoming-webhooks]
 
 ### In Jenkins pipeline
 
@@ -62,7 +62,7 @@ pipeline {
   stages {
     stage('Send start notification to Slack') {
       steps {
-        sh 'node bin/main.js -p "$WORKSPACE/app" -g "$WORKSPACE" -w "https://hooks.slack.com/services/XXXXXXXXX/YYYYYYYYY/ZZZZZZZZZZZZZZZZZZZZZZZZ" -c "#AAAAAA" -t "Build started"'
+        sh 'ci-build-notifier -a "$WORKSPACE/app" -g "$WORKSPACE" -s "https://hooks.slack.com/services/XXXXXXXXX/YYYYYYYYY/ZZZZZZZZZZZZZZZZZZZZZZZZ" -c "#AAAAAA" -t "Build started"'
       }
     }
   }
@@ -85,12 +85,10 @@ Pull requests are welcome!
 
 Authors of used libraries especially author of env-ci.
 
-# Credits
+# Author
 
-Lukas Novak
+## Lukas Novak
 
-[http://www.novaklukas.cz]
+[![Author](http://www.novaklukas.cz/images/profile.png)](http://www.novaklukas.cz)
 
-[https://medium.com/@novalu]
-
-Freelance full-stack software developer based in Olomouc, Czech Republic. I focus on mobile apps with Kotlin, servers in Node.js. As a hobby, I build my smart home.
+Freelance full-stack software developer based in Olomouc, Czech Republic. I focus on mobile apps with Kotlin, servers in Node.js. As a hobby, I build my smart home. See my [personal web page](http://www.novaklukas.cz) (in Czech) or blog on [Medium](https://medium.com/@novalu)
