@@ -12,16 +12,18 @@ var __param = (this && this.__param) || function (paramIndex, decorator) {
     return function (target, key) { decorator(target, key, paramIndex); }
 };
 var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
+    function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
     return new (P || (P = Promise))(function (resolve, reject) {
         function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
         function rejected(value) { try { step(generator["throw"](value)); } catch (e) { reject(e); } }
-        function step(result) { result.done ? resolve(result.value) : new P(function (resolve) { resolve(result.value); }).then(fulfilled, rejected); }
+        function step(result) { result.done ? resolve(result.value) : adopt(result.value).then(fulfilled, rejected); }
         step((generator = generator.apply(thisArg, _arguments || [])).next());
     });
 };
 var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
+var App_1;
 Object.defineProperty(exports, "__esModule", { value: true });
 const env_ci_1 = __importDefault(require("env-ci"));
 const git_raw_commits_1 = __importDefault(require("git-raw-commits"));
@@ -38,7 +40,7 @@ const ConsoleMessenger_1 = require("./managers/messenger/impl/ConsoleMessenger")
 const SlackMessenger_1 = require("./managers/messenger/impl/SlackMessenger");
 const AppLastCommitCommitProvider_1 = require("./providers/commit_provider/impl/AppLastCommitCommitProvider");
 const CiCommitProvider_1 = require("./providers/commit_provider/impl/CiCommitProvider");
-let App = class App {
+let App = App_1 = class App {
     constructor(logger) {
         this.logger = logger;
     }
@@ -96,6 +98,8 @@ let App = class App {
             commander_1.default
                 .version(packageJsonContent.version)
                 .option("-g, --git-path <var>", "GIT root path")
+                .option("-u --username <var>", "Bot username (optional, \"Build notifier\" if not set)")
+                .option("-i --icon <var>", "Bot icon (optional, Jenkins icon if not set)")
                 .option("-t, --text <var>", "Message text")
                 .option("-a, --node-app-path <var>", "Node.js application path as a source for version (optional)")
                 .option("-v, --app-version <var>", "Set version manually (optional)")
@@ -124,16 +128,23 @@ let App = class App {
                 this.logger.error("Text is not defined");
                 return false;
             }
+            const username = commander_1.default.username || "Build notifier";
+            const icon = commander_1.default.icon || App_1.JENKINS_LOGO_URL;
+            if (!validator_1.default.isURL(icon)) {
+                this.logger.error("Icon is not valid URL");
+                return false;
+            }
             container_1.default.bind(types_1.default.CommitProvider).to(commander_1.default.lastCommit ? AppLastCommitCommitProvider_1.AppLastCommitCommitProvider : CiCommitProvider_1.CiCommitProvider);
             container_1.default.bind(types_1.default.Messenger).to(commander_1.default.useConsole ? ConsoleMessenger_1.ConsoleMessenger : SlackMessenger_1.SlackMessenger);
             const messenger = container_1.default.get(types_1.default.Messenger);
             const buildInfo = yield this.makeBuildInfo(commander_1.default.nodeAppPath, commander_1.default.gitPath, commander_1.default.appVersion);
-            yield messenger.sendMessage(buildInfo, commander_1.default.slackWebhook, commander_1.default.color, commander_1.default.text);
+            yield messenger.sendMessage(buildInfo, commander_1.default.slackWebhook, commander_1.default.color, commander_1.default.text, username, icon);
             return true;
         });
     }
 };
-App = __decorate([
+App.JENKINS_LOGO_URL = "https://raw.githubusercontent.com/novalu/ci-build-notifier/master/assets/jenkins-logo.png";
+App = App_1 = __decorate([
     inversify_1.injectable(),
     __param(0, inversify_1.inject(types_1.default.Logger)),
     __metadata("design:paramtypes", [Object])

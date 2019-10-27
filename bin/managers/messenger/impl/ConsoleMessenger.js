@@ -38,7 +38,7 @@ let ConsoleMessenger = class ConsoleMessenger {
             return text;
         }
     }
-    sendMessage(buildInfo, slackWebhook, color, text) {
+    sendMessage(buildInfo, slackWebhook, color, text, username, icon) {
         this.logger.info(chalk_1.default.hex(color)(text));
         if (buildInfo.version)
             this.logger.info(this.color(color, `Version: ${buildInfo.version}`));
