@@ -42,6 +42,8 @@ Now you can send messages by running the command `ci-build-notifier` with right 
 | Shorthand | Option | Description  |
 | ------------- |-------------| -----|
 | -g | --git-path | GIT root path |
+| -u | --username | Bot username (optional, "Build notifier" if not set) |
+| -i | --icon | Bot icon (optional, Jenkins icon if not set) |
 | -t | --text | Message text |
 | -a | --node-app-path | Node.js application path as a source for version (optional) |
 | -v | --app-version | Set version manually (optional) |

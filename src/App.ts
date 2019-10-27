@@ -21,6 +21,8 @@ import {CiCommitProvider} from "./providers/commit_provider/impl/CiCommitProvide
 @injectable()
 class App {
 
+    private static readonly JENKINS_LOGO_URL = "https://raw.githubusercontent.com/novalu/ci-build-notifier/master/assets/jenkins-logo.png";
+
     constructor(
         @inject(TYPES.Logger) private logger: Logger
     ) {}
@@ -79,6 +81,8 @@ class App {
         commander
             .version(packageJsonContent.version)
             .option("-g, --git-path <var>", "GIT root path")
+            .option("-u --username <var>", "Bot username (optional, \"Build notifier\" if not set)")
+            .option("-i --icon <var>", "Bot icon (optional, Jenkins icon if not set)")
             .option("-t, --text <var>", "Message text")
             .option("-a, --node-app-path <var>", "Node.js application path as a source for version (optional)")
             .option("-v, --app-version <var>", "Set version manually (optional)")
@@ -113,6 +117,14 @@ class App {
             return false;
         }
 
+        const username = commander.username || "Build notifier";
+
+        const icon = commander.icon || App.JENKINS_LOGO_URL;
+        if (!validator.isURL(icon)) {
+            this.logger.error("Icon is not valid URL");
+            return false;
+        }
+
         container.bind<CommitProvider>(TYPES.CommitProvider).to(
             commander.lastCommit ? AppLastCommitCommitProvider : CiCommitProvider);
 
@@ -121,7 +133,7 @@ class App {
         const messenger = container.get<Messenger>(TYPES.Messenger);
 
         const buildInfo = await this.makeBuildInfo(commander.nodeAppPath, commander.gitPath, commander.appVersion);
-        await messenger.sendMessage(buildInfo, commander.slackWebhook, commander.color, commander.text);
+        await messenger.sendMessage(buildInfo, commander.slackWebhook, commander.color, commander.text, username, icon);
 
         return true;
     }
