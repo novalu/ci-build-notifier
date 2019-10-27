@@ -27,7 +27,7 @@ class ConsoleMessenger implements Messenger {
         }
     }
 
-    sendMessage(buildInfo: BuildInfo, slackWebhook: string, color: string, text: string) {
+    sendMessage(buildInfo: BuildInfo, slackWebhook: string, color: string, text: string, username: string, icon: string) {
         this.logger.info(chalk.hex(color)(text));
         if (buildInfo.version) this.logger.info(this.color(color, `Version: ${buildInfo.version}`));
         if (buildInfo.build) this.logger.info(this.color(color, `Build: ${buildInfo.build}`));

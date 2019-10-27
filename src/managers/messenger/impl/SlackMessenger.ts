@@ -73,11 +73,11 @@ class SlackMessenger implements Messenger {
         return attachment;
     }
 
-    public async sendMessage(buildInfo: BuildInfo, webhookUrl: string, color: string, text: string) {
+    public async sendMessage(buildInfo: BuildInfo, webhookUrl: string, color: string, text: string, username: string, icon: string) {
         const webhook = new IncomingWebhook(webhookUrl);
         await webhook.send({
-            username: "Jenkins [bot]",
-            icon_url: "https://raw.githubusercontent.com/novalu/ci-build-notifier/master/assets/jenkins-logo.png",
+            username,
+            icon_url: icon,
             text,
             attachments: [ this.createAttachment(buildInfo, color) ]
         });
