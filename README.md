@@ -1,3 +1,7 @@
+# This repo has been archived.
+
+---
+
 [![NPM](https://nodei.co/npm/ci-build-notifier.png)](https://nodei.co/npm/ci-build-notifier/)
 
 # CI Build Slack Notifier
